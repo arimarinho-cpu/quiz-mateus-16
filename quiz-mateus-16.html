@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz · Lição 16 · Mateus 16</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#ffffff; --ink:#1a1a1a; --charcoal:#333333; --slate:#565656;
+    --stone:#7c7c7c; --mist:#a6a6a6; --rule:#dcdcdc; --panel:#f4f4f4;
+    --panel-line:#cfcfcf; --pale:#ececec;
+    --serif:'EB Garamond', Georgia, 'Times New Roman', serif;
+    --display:'Cormorant Garamond', Georgia, serif;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--serif); font-size:19px; line-height:1.6;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    font-feature-settings:"liga" 1,"onum" 1;
+  }
+  .wrap{max-width:44rem; margin:0 auto; padding:0 1.4rem; min-height:100vh; display:flex; flex-direction:column;}
+  .kicker{font-family:var(--serif); text-transform:uppercase; letter-spacing:.24em;
+    font-size:.72rem; font-weight:600; color:var(--stone);}
+
+  /* header */
+  header.top{padding:1.8rem 0 1.2rem; border-bottom:1px solid var(--ink); margin-bottom:0;}
+  header.top .kicker{display:block; margin-bottom:.35rem;}
+  header.top h1{font-family:var(--display); font-weight:600; font-size:1.5rem; line-height:1.1; margin:0;}
+
+  main{flex:1 0 auto; padding:2rem 0 1rem;}
+
+  /* progress */
+  .progress{display:flex; align-items:center; gap:1rem; margin-bottom:1.8rem;}
+  .progress .count{font-family:var(--serif); font-size:.8rem; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--slate); font-weight:600; white-space:nowrap;}
+  .bar{flex:1; height:3px; background:var(--pale); position:relative; overflow:hidden;}
+  .bar > i{position:absolute; left:0; top:0; bottom:0; width:0%; background:var(--ink); transition:width .4s ease;}
+  .score-pill{font-family:var(--serif); font-size:.8rem; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--slate); font-weight:600; white-space:nowrap;}
+
+  /* start screen */
+  .start{padding:2.5rem 0; text-align:left;}
+  .start .emblem{font-family:var(--display); font-size:5rem; line-height:1; color:var(--mist); font-weight:500; margin-bottom:.4rem;}
+  .start h2{font-family:var(--display); font-size:2.2rem; font-weight:600; line-height:1.08; margin:.2rem 0 .3rem;}
+  .start .ref{display:block; margin:.2rem 0 1.4rem;}
+  .start p{color:var(--charcoal); max-width:34rem; margin:0 0 1rem;}
+  .start .meta{display:flex; gap:1.6rem; margin:1.6rem 0 2rem; flex-wrap:wrap;}
+  .start .meta div{}
+  .start .meta .n{font-family:var(--display); font-size:2rem; font-weight:600; line-height:1; display:block;}
+  .start .meta .l{font-size:.72rem; text-transform:uppercase; letter-spacing:.16em; color:var(--stone); font-weight:600;}
+
+  /* question */
+  .movtag{display:block; margin-bottom:.7rem;}
+  .qtext{font-family:var(--display); font-size:1.7rem; line-height:1.2; font-weight:600; margin:0 0 1.6rem; color:var(--ink);}
+  .qtext .vref{font-family:var(--serif); font-size:.95rem; font-weight:600; color:var(--stone); letter-spacing:.02em;}
+
+  .options{display:flex; flex-direction:column; gap:.7rem; margin:0 0 1.4rem;}
+  .opt{
+    display:flex; align-items:flex-start; gap:.85rem; width:100%; text-align:left;
+    background:var(--paper); border:1px solid var(--panel-line); padding:.85rem 1rem;
+    font-family:var(--serif); font-size:1.02rem; line-height:1.4; color:var(--charcoal);
+    cursor:pointer; transition:background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .opt:hover:not(:disabled){border-color:var(--ink); background:#fafafa;}
+  .opt:focus-visible{outline:2px solid var(--ink); outline-offset:2px;}
+  .opt .mark{
+    flex:0 0 auto; width:1.5rem; height:1.5rem; border:1px solid var(--panel-line);
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:var(--serif); font-size:.85rem; font-weight:600; color:var(--slate); margin-top:.05rem;
+  }
+  .opt[disabled]{cursor:default;}
+  .opt.correct{background:var(--ink); border-color:var(--ink); color:#fff;}
+  .opt.correct .mark{background:#fff; border-color:#fff; color:var(--ink);}
+  .opt.wrong{border-color:var(--stone); color:var(--stone); background:#fbfbfb;}
+  .opt.wrong .mark{border-color:var(--stone); color:var(--stone);}
+  .opt.dim{opacity:.5;}
+  .opt .yourlabel{display:block; font-size:.68rem; text-transform:uppercase; letter-spacing:.14em;
+    color:var(--stone); font-weight:600; margin-top:.25rem;}
+
+  .explain{
+    border-top:1px solid var(--rule); padding-top:1.1rem; margin-top:.4rem;
+    animation:fade .35s ease;
+  }
+  .explain .kicker{display:block; margin-bottom:.45rem;}
+  .explain p{margin:0; color:var(--charcoal);}
+  @keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+
+  /* buttons */
+  .btn{
+    display:inline-flex; align-items:center; gap:.5rem; font-family:var(--serif);
+    font-size:1rem; font-weight:600; letter-spacing:.02em; padding:.7rem 1.6rem;
+    background:var(--ink); color:#fff; border:1px solid var(--ink); cursor:pointer;
+    transition:background .15s ease;
+  }
+  .btn:hover{background:#000;}
+  .btn:focus-visible{outline:2px solid var(--ink); outline-offset:3px;}
+  .btn.ghost{background:transparent; color:var(--ink);}
+  .btn.ghost:hover{background:var(--panel);}
+  .actions{display:flex; justify-content:flex-end; margin-top:.6rem;}
+  .actions.between{justify-content:space-between; align-items:center;}
+
+  /* results */
+  .result{padding:1.5rem 0; text-align:center;}
+  .result .kicker{display:block; margin-bottom:1rem;}
+  .result .big{font-family:var(--display); font-size:5.5rem; line-height:1; font-weight:600;}
+  .result .big small{font-size:2rem; color:var(--mist); font-weight:500;}
+  .result .pct{font-size:.8rem; text-transform:uppercase; letter-spacing:.18em; color:var(--stone); font-weight:600; margin-top:.3rem;}
+  .result .msg{font-family:var(--display); font-style:italic; font-size:1.5rem; line-height:1.3;
+    color:var(--charcoal); max-width:30rem; margin:1.6rem auto 0;}
+  .result .actions{justify-content:center; margin-top:2rem;}
+
+  .review{margin:2.6rem 0 0; text-align:left; border-top:1px solid var(--ink); padding-top:1.4rem;}
+  .review > .kicker{display:block; margin-bottom:1rem;}
+  .review .item{padding:1rem 0; border-bottom:1px solid var(--rule);}
+  .review .item:last-child{border-bottom:0;}
+  .review .rq{font-family:var(--display); font-size:1.12rem; font-weight:600; line-height:1.25; margin:0 0 .5rem;
+    display:flex; gap:.6rem; align-items:baseline;}
+  .review .rq .st{flex:0 0 auto; font-family:var(--serif); font-size:.9rem; font-weight:600;}
+  .review .rq .st.ok{color:var(--ink);}
+  .review .rq .st.no{color:var(--stone);}
+  .review .ans{margin:.15rem 0 0; font-size:.98rem; color:var(--charcoal);}
+  .review .ans b{font-weight:600; color:var(--ink);}
+  .review .ans .miss{color:var(--stone);}
+
+  footer.bottom{padding:1.6rem 0 2.2rem; border-top:1px solid var(--rule); margin-top:1.5rem;
+    text-align:center; color:var(--stone);}
+  footer.bottom .sdg{font-family:var(--display); font-style:italic; font-size:1.15rem; color:var(--charcoal); margin:0 0 .3rem;}
+  footer.bottom p{margin:0; font-size:.78rem;}
+
+  .hidden{display:none !important;}
+
+  @media (max-width:560px){
+    body{font-size:17.5px;}
+    .qtext{font-size:1.42rem;}
+    .result .big{font-size:4.4rem;}
+    .start h2{font-size:1.9rem;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span class="kicker">Escola Bíblica · Estudos Expositivos em Mateus</span>
+    <h1>Quiz da Lição 16</h1>
+  </header>
+
+  <main>
+    <!-- START -->
+    <section id="start" class="start">
+      <div class="emblem">16</div>
+      <h2>A Revelação do Rei e o Chamado ao Discipulado</h2>
+      <span class="kicker ref">Mateus 16.1–28</span>
+      <p>Quatorze perguntas percorrem os quatro movimentos do capítulo: do discernimento dos sinais à confissão de Pedro, do anúncio da cruz ao chamado do discipulado. A cada resposta, uma breve explicação ancorada no texto.</p>
+      <div class="meta">
+        <div><span class="n">14</span><span class="l">Perguntas</span></div>
+        <div><span class="n">4</span><span class="l">Movimentos</span></div>
+        <div><span class="n">1</span><span class="l">Capítulo</span></div>
+      </div>
+      <button class="btn" id="startBtn">Iniciar o quiz</button>
+    </section>
+
+    <!-- QUIZ -->
+    <section id="quiz" class="hidden">
+      <div class="progress">
+        <span class="count" id="count">Pergunta 1 de 14</span>
+        <div class="bar"><i id="barFill"></i></div>
+        <span class="score-pill" id="scorePill">0 acertos</span>
+      </div>
+      <span class="kicker movtag" id="movtag"></span>
+      <h2 class="qtext" id="qtext"></h2>
+      <div class="options" id="options"></div>
+      <div class="explain hidden" id="explain">
+        <span class="kicker">Comentário</span>
+        <p id="explainText"></p>
+      </div>
+      <div class="actions">
+        <button class="btn hidden" id="nextBtn">Próxima</button>
+      </div>
+    </section>
+
+    <!-- RESULT -->
+    <section id="result" class="result hidden">
+      <span class="kicker">Resultado</span>
+      <div class="big"><span id="finalScore">0</span><small> / 14</small></div>
+      <div class="pct" id="finalPct"></div>
+      <p class="msg" id="finalMsg"></p>
+      <div class="actions">
+        <button class="btn" id="retryBtn">Refazer o quiz</button>
+      </div>
+      <div class="review" id="review"></div>
+    </section>
+  </main>
+
+  <footer class="bottom">
+    <p class="sdg">Soli Deo Gloria</p>
+    <p>Estudos Expositivos no Evangelho de Mateus · Lição 16</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var QUESTIONS = [
+    { mov:"I · O Discernimento do Reino", ref:"16.1–4",
+      q:"À geração que exigia \u201Cum sinal do céu\u201D, qual foi o único sinal que Jesus prometeu?",
+      options:["O sinal de Elias","O sinal de Jonas","Uma coluna de fogo","Um sinal no templo"],
+      answer:1,
+      explain:"O \u201Csinal de Jonas\u201D aponta para a morte, o sepultamento e a ressurreição de Cristo (cf. Mt 12.40): o sinal definitivo. Quando ele aconteceu, os líderes ainda preferiram a incredulidade." },
+
+    { mov:"I · O Discernimento do Reino", ref:"16.1",
+      q:"Fariseus e saduceus, partidos rivais em teologia e política, uniram-se principalmente por causa de:",
+      options:["Um acordo doutrinário","Uma aliança formal com Roma","A oposição comum a Jesus","O zelo pela ressurreição"],
+      answer:2,
+      explain:"Quando o Reino confronta as estruturas humanas de poder, diferenças profundas cedem lugar a uma oposição comum ao agir de Deus." },
+
+    { mov:"I · O Discernimento do Reino", ref:"16.6–12",
+      q:"Ao advertir contra o \u201Cfermento dos fariseus e saduceus\u201D, Jesus se referia a:",
+      options:["O pão que os discípulos esqueceram","A doutrina dos fariseus e dos saduceus: o ensino que corrompe silenciosamente","A hipocrisia dos romanos","As tradições de higiene ritual"],
+      answer:1,
+      explain:"O próprio Mateus define o fermento como a doutrina (didachē) dos fariseus e dos saduceus (16.12): um ensino que, mesmo sob linguagem piedosa, afasta da verdadeira identidade do Messias." },
+
+    { mov:"II · A Revelação do Rei", ref:"16.13",
+      q:"Em que região Jesus fez a pergunta que levou à grande confissão de Pedro?",
+      options:["Cafarnaum","Cesareia de Filipe","Betânia","Monte das Oliveiras"],
+      answer:1,
+      explain:"Cesareia de Filipe, ao norte da Galileia, era saturada de paganismo e culto imperial. Nesse cenário gentílico, Jesus pergunta por sua verdadeira identidade." },
+
+    { mov:"II · A Revelação do Rei", ref:"16.16–17",
+      q:"Segundo Jesus, o que tornou possível a Pedro confessar \u201CTu és o Cristo, o Filho do Deus vivo\u201D?",
+      options:["Seu estudo das Escrituras","Sua convivência com Jesus","A revelação do Pai","A instrução dos outros apóstolos"],
+      answer:2,
+      explain:"\u201CNão foi carne e sangue que te revelou isso, mas meu Pai.\u201D A fé nasce da revelação do Pai, sem que isso dispense as evidências que a fundamentam." },
+
+    { mov:"II · A Revelação do Rei", ref:"16.18",
+      q:"Sobre \u201Csobre esta pedra edificarei a minha igreja\u201D, qual é a síntese equilibrada apresentada na lição?",
+      options:[
+        "Pedro é fundamento infalível e sucessório da Igreja",
+        "A pedra é apenas a confissão, sem qualquer relação com Pedro",
+        "Pedro é o referente próximo e imediato, porém, ele o é apenas, e tão somente, por ter confessado Jesus como o Messias, revelado pelo Pai",
+        "A pedra é o monte de Cesareia de Filipe"
+      ],
+      answer:2,
+      explain:"A leitura mais natural identifica a pedra com o próprio Pedro: não por seu caráter, mas por seu ofício e função, e sempre como o Pedro que confessa a Cristo. Cristo é o edificador; a Igreja é d\u2019Ele." },
+
+    { mov:"II · A Revelação do Rei", ref:"16.18",
+      q:"Quem é o sujeito do verbo \u201Cedificarei\u201D (\u201Cedificarei a minha igreja\u201D)?",
+      options:["Pedro","Os doze apóstolos","O próprio Cristo","A comunidade de fé"],
+      answer:2,
+      explain:"O verbo está no futuro e tem por sujeito Cristo: só Ele constrói a Igreja, que Lhe pertence (\u201Cminha igreja\u201D)." },
+
+    { mov:"II · A Revelação do Rei", ref:"16.18",
+      q:"A palavra \u201Cigreja\u201D (ekklēsía), em sua primeira ocorrência nos Evangelhos, significa basicamente:",
+      options:[
+        "Os \u201Cchamados para fora\u201D, conforme a etimologia popular",
+        "Uma assembleia ou congregação, como o qahal da Septuaginta",
+        "Uma sinagoga separada dos judeus",
+        "Um edifício destinado ao culto"
+      ],
+      answer:1,
+      explain:"Ekklēsía significa assembleia ou congregação (o qahal da Septuaginta). Não deve ser definida pela etimologia popular \u201Cchamados para fora\u201D. Designa a comunidade messiânica que pertence a Jesus." },
+
+    { mov:"II · A Revelação do Rei", ref:"16.18",
+      q:"A promessa de que \u201Cas portas do inferno [Hades] não prevalecerão\u201D significa, corretamente, que:",
+      options:[
+        "A Igreja vencerá uma batalha territorial contra Satanás",
+        "A morte não deterá a Igreja edificada por Cristo",
+        "Nenhum crente jamais sofrerá perseguição",
+        "O inferno será esvaziado ao fim dos tempos"
+      ],
+      answer:1,
+      explain:"No grego, \u201CHades\u201D é o domínio da morte, e portas resistem, não atacam. A morte não prevalecerá sobre a comunidade que Cristo edifica, pois o próprio Messias morre e ressuscita." },
+
+    { mov:"II · A Revelação do Rei", ref:"16.19",
+      q:"As \u201Cchaves do Reino\u201D (16.19) evocam qual texto do Antigo Testamento?",
+      options:[
+        "Isaías 22.22, sobre Eliaquim, mordomo da casa de Davi",
+        "Gênesis 22.17, sobre a posse das portas dos inimigos",
+        "Salmo 23, sobre o Senhor como Pastor",
+        "Daniel 7, sobre o Filho do Homem"
+      ],
+      answer:0,
+      explain:"As chaves evocam Isaías 22.22, onde Eliaquim recebe autoridade administrativa sobre a casa de Davi. Pedro é administrador investido de autoridade derivada, não proprietário do Reino." },
+
+    { mov:"III · O Caminho do Rei", ref:"16.21",
+      q:"Logo após a confissão de Pedro, o que Jesus \u201Ccomeçou a mostrar\u201D aos discípulos?",
+      options:[
+        "Que estabeleceria um reino político em Jerusalém",
+        "Que deveria sofrer, ser morto e ressuscitar",
+        "Que Pedro seria o líder da Igreja",
+        "Que o templo seria restaurado"
+      ],
+      answer:1,
+      explain:"A virada \u201Cdesde então\u201D (apò tóte) abre a caminhada para a cruz: sofrer, ser rejeitado, ser morto e ressuscitar ao terceiro dia." },
+
+    { mov:"III · O Caminho do Rei", ref:"16.22–23",
+      q:"Por que Jesus repreendeu Pedro com as palavras \u201CPara trás de mim, Satanás\u201D?",
+      options:[
+        "Porque Pedro havia negado conhecê-Lo",
+        "Porque Pedro duvidou da ressurreição",
+        "Porque Pedro pensava \u201Cas coisas dos homens\u201D, rejeitando a cruz",
+        "Porque Pedro pediu o primeiro lugar no Reino"
+      ],
+      answer:2,
+      explain:"Ao tentar dissuadir Jesus da cruz, Pedro repetiu a tentação do deserto: um Messias sem sofrimento. A \u201Cpedra\u201D torna-se, por instantes, \u201Cpedra de tropeço\u201D (skándalon)." },
+
+    { mov:"IV · O Chamado ao Discipulado", ref:"16.24",
+      q:"Quais são os três imperativos do discipulado que Jesus apresenta?",
+      options:[
+        "Crer, orar e jejuar",
+        "Negar-se, tomar a cruz e seguir",
+        "Vender tudo, pregar e batizar",
+        "Vigiar, servir e esperar"
+      ],
+      answer:1,
+      explain:"\u201CNegue-se a si mesmo, tome a sua cruz e siga-me.\u201D Negar-se é deixar de reivindicar o governo da própria vida; tomar a cruz significava, no primeiro século, entrega radical." },
+
+    { mov:"IV · O Chamado ao Discipulado", ref:"16.25",
+      q:"O paradoxo do Reino em 16.25 ensina que:",
+      options:[
+        "Quem trabalha muito será recompensado",
+        "Quem busca salvar a própria vida a perderá; quem a perde por Cristo a encontrará",
+        "Quem sofre nesta vida terá conforto",
+        "Quem guarda a Lei alcança a vida eterna"
+      ],
+      answer:1,
+      explain:"A lógica humana é invertida: preservar a vida para si é perdê-la; entregá-la por causa de Cristo é encontrá-la. O sucesso redefine-se à luz da cruz." }
+  ];
+
+  var TOTAL = QUESTIONS.length;
+  var idx = 0, score = 0, answered = false;
+  var picks = []; // stores chosen index per question
+
+  var el = function(id){ return document.getElementById(id); };
+  var startSec = el('start'), quizSec = el('quiz'), resultSec = el('result');
+
+  function show(sec){ startSec.classList.add('hidden'); quizSec.classList.add('hidden'); resultSec.classList.add('hidden'); sec.classList.remove('hidden'); }
+
+  function startQuiz(){
+    idx = 0; score = 0; picks = []; answered = false;
+    show(quizSec);
+    render();
+    window.scrollTo(0,0);
+  }
+
+  function render(){
+    answered = false;
+    var Q = QUESTIONS[idx];
+    el('count').textContent = 'Pergunta ' + (idx+1) + ' de ' + TOTAL;
+    el('scorePill').textContent = score + (score===1 ? ' acerto' : ' acertos');
+    el('barFill').style.width = ((idx)/TOTAL*100) + '%';
+    el('movtag').textContent = Q.mov;
+    el('qtext').innerHTML = escapeHtml(Q.q) + ' <span class="vref">(Mt ' + Q.ref + ')</span>';
+
+    var opts = el('options');
+    opts.innerHTML = '';
+    Q.options.forEach(function(text, i){
+      var b = document.createElement('button');
+      b.className = 'opt';
+      b.type = 'button';
+      b.setAttribute('data-i', i);
+      var letter = String.fromCharCode(65+i);
+      b.innerHTML = '<span class="mark">' + letter + '</span><span class="otext">' + escapeHtml(text) + '</span>';
+      b.addEventListener('click', function(){ choose(i); });
+      opts.appendChild(b);
+    });
+
+    el('explain').classList.add('hidden');
+    el('nextBtn').classList.add('hidden');
+    el('nextBtn').textContent = (idx === TOTAL-1) ? 'Ver resultado' : 'Próxima';
+  }
+
+  function choose(i){
+    if(answered) return;
+    answered = true;
+    picks[idx] = i;
+    var Q = QUESTIONS[idx];
+    var correct = Q.answer;
+    if(i === correct) score++;
+
+    var buttons = el('options').querySelectorAll('.opt');
+    buttons.forEach(function(b){
+      var bi = parseInt(b.getAttribute('data-i'),10);
+      b.disabled = true;
+      if(bi === correct){
+        b.classList.add('correct');
+        b.querySelector('.mark').textContent = '\u2713';
+      } else if(bi === i){
+        b.classList.add('wrong');
+        b.querySelector('.mark').textContent = '\u2717';
+        var yl = document.createElement('span');
+        yl.className = 'yourlabel';
+        yl.textContent = 'Sua resposta';
+        b.querySelector('.otext').appendChild(yl);
+      } else {
+        b.classList.add('dim');
+      }
+    });
+
+    el('scorePill').textContent = score + (score===1 ? ' acerto' : ' acertos');
+    el('explainText').textContent = Q.explain;
+    el('explain').classList.remove('hidden');
+    el('nextBtn').classList.remove('hidden');
+    el('nextBtn').focus();
+  }
+
+  function next(){
+    if(idx < TOTAL-1){
+      idx++;
+      render();
+      window.scrollTo(0,0);
+    } else {
+      finish();
+    }
+  }
+
+  function finish(){
+    el('barFill').style.width = '100%';
+    show(resultSec);
+    el('finalScore').textContent = score;
+    var pct = Math.round(score/TOTAL*100);
+    el('finalPct').textContent = pct + '% de acerto';
+    el('finalMsg').textContent = messageFor(score);
+    buildReview();
+    window.scrollTo(0,0);
+  }
+
+  function messageFor(s){
+    if (s === TOTAL) return "“Bem-aventurado és tu”: a revelação do Pai firmou-se em ti. Ensina outros com a mesma clareza.";
+    if (s >= 12) return "Excelente domínio do capítulo. Um ou outro detalhe merece uma segunda leitura do texto.";
+    if (s >= 9)  return "Bom caminho. Revisite os movimentos da confissão e da cruz para consolidar o todo.";
+    if (s >= 5)  return "Um começo sincero. Releia a lição com calma: o capítulo recompensa quem volta a ele.";
+    return "Não desanime: até Pedro precisou desaprender antes de confessar. Retome a lição e refaça o quiz.";
+  }
+
+  function buildReview(){
+    var r = el('review');
+    r.innerHTML = '<span class="kicker">Gabarito comentado</span>';
+    QUESTIONS.forEach(function(Q, i){
+      var chosen = picks[i];
+      var ok = (chosen === Q.answer);
+      var item = document.createElement('div');
+      item.className = 'item';
+      var st = ok ? '<span class="st ok">\u2713</span>' : '<span class="st no">\u2717</span>';
+      var html = '<p class="rq">' + st + '<span>' + escapeHtml(Q.q) + '</span></p>';
+      html += '<p class="ans"><b>Resposta: ' + escapeHtml(Q.options[Q.answer]) + '.</b> ' + escapeHtml(Q.explain) + '</p>';
+      if(!ok){
+        var pick = (typeof chosen === 'number') ? Q.options[chosen] : '(sem resposta)';
+        html += '<p class="ans"><span class="miss">Você marcou: ' + escapeHtml(pick) + '.</span></p>';
+      }
+      item.innerHTML = html;
+      r.appendChild(item);
+    });
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  el('startBtn').addEventListener('click', startQuiz);
+  el('nextBtn').addEventListener('click', next);
+  el('retryBtn').addEventListener('click', startQuiz);
+})();
+</script>
+</body>
+</html>
